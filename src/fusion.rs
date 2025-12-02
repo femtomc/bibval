@@ -80,20 +80,28 @@ fn fuse_year(local: &Entry, results: &[&ValidationResult]) -> Option<Discrepancy
 
     // Only report if:
     // 1. The consensus year differs from local
-    // 2. At least 2 validators agree (we don't trust a single source for year errors)
-    if *consensus_year != local_year && sources.len() >= 2 {
+    // 2. At least 2 validators agree, OR only 1 validator found anything at all
+    let total_validators = results.len();
+    let min_agreement = if total_validators == 1 { 1 } else { 2 };
+
+    if *consensus_year != local_year && sources.len() >= min_agreement {
         let source_names: Vec<_> = sources.iter().map(|s| s.to_string()).collect();
+        let message = if sources.len() == 1 {
+            format!("Year mismatch: {} vs {}", local_year, consensus_year)
+        } else {
+            format!(
+                "Year mismatch: {} vs {} (agreed by {})",
+                local_year,
+                consensus_year,
+                source_names.join(", ")
+            )
+        };
         Some(Discrepancy {
             field: DiscrepancyField::Year,
             severity: Severity::Error,
             local_value: local_year.to_string(),
             remote_value: consensus_year.to_string(),
-            message: format!(
-                "Year mismatch: {} vs {} (agreed by {})",
-                local_year,
-                consensus_year,
-                source_names.join(", ")
-            ),
+            message,
         })
     } else {
         None
@@ -113,21 +121,29 @@ fn fuse_title(_local: &Entry, results: &[&ValidationResult]) -> Option<Discrepan
         })
         .collect();
 
-    // Only report if at least 2 validators agree there's a title problem
-    // A single validator reporting title mismatch is likely a bad match - ignore it
-    if title_issues.len() >= 2 {
+    // Only report if at least 2 validators agree there's a title problem,
+    // OR if only 1 validator found anything at all (trust the only source we have)
+    let total_validators = results.len();
+    let min_agreement = if total_validators == 1 { 1 } else { 2 };
+
+    if title_issues.len() >= min_agreement {
         let (_source, discrepancy) = &title_issues[0];
         let sources: Vec<_> = title_issues.iter().map(|(s, _)| s.to_string()).collect();
+        let message = if sources.len() == 1 {
+            discrepancy.message.clone()
+        } else {
+            format!(
+                "{} (confirmed by {})",
+                discrepancy.message,
+                sources.join(", ")
+            )
+        };
         Some(Discrepancy {
             field: DiscrepancyField::Title,
             severity: Severity::Error,
             local_value: discrepancy.local_value.clone(),
             remote_value: discrepancy.remote_value.clone(),
-            message: format!(
-                "{} (confirmed by {})",
-                discrepancy.message,
-                sources.join(", ")
-            ),
+            message,
         })
     } else {
         None

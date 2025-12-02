@@ -80,10 +80,8 @@ fn fuse_year(local: &Entry, results: &[&ValidationResult]) -> Option<Discrepancy
 
     // Only report if:
     // 1. The consensus year differs from local
-    // 2. At least 2 validators agree, OR it's the only validator that found something
-    let min_agreement = if results.len() == 1 { 1 } else { 2 };
-
-    if *consensus_year != local_year && sources.len() >= min_agreement {
+    // 2. At least 2 validators agree (we don't trust a single source for year errors)
+    if *consensus_year != local_year && sources.len() >= 2 {
         let source_names: Vec<_> = sources.iter().map(|s| s.to_string()).collect();
         Some(Discrepancy {
             field: DiscrepancyField::Year,
@@ -115,13 +113,9 @@ fn fuse_title(_local: &Entry, results: &[&ValidationResult]) -> Option<Discrepan
         })
         .collect();
 
-    // Only report if multiple validators agree there's a title problem
+    // Only report if at least 2 validators agree there's a title problem
     // A single validator reporting title mismatch is likely a bad match - ignore it
-    // Exception: if there's only one validator total AND it found a match, we trust it
-    let total_with_matches = results.len();
-    let min_agreement = if total_with_matches <= 1 { 1 } else { 2 };
-
-    if title_issues.len() >= min_agreement {
+    if title_issues.len() >= 2 {
         let (_source, discrepancy) = &title_issues[0];
         let sources: Vec<_> = title_issues.iter().map(|(s, _)| s.to_string()).collect();
         Some(Discrepancy {

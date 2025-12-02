@@ -82,6 +82,7 @@ pub enum ApiSource {
     OpenAlex,
     OpenLibrary,
     OpenReview,
+    Zenodo,
 }
 
 impl std::fmt::Display for ApiSource {
@@ -94,6 +95,7 @@ impl std::fmt::Display for ApiSource {
             ApiSource::OpenAlex => write!(f, "OpenAlex"),
             ApiSource::OpenLibrary => write!(f, "Open Library"),
             ApiSource::OpenReview => write!(f, "OpenReview"),
+            ApiSource::Zenodo => write!(f, "Zenodo"),
         }
     }
 }

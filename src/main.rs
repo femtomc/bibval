@@ -41,6 +41,10 @@ struct Args {
     #[arg(long)]
     no_openreview: bool,
 
+    /// Disable Zenodo API
+    #[arg(long)]
+    no_zenodo: bool,
+
     /// Disable caching of API responses
     #[arg(long)]
     no_cache: bool,
@@ -111,6 +115,7 @@ async fn main() -> ExitCode {
         use_openalex: !args.no_openalex,
         use_openlibrary: !args.no_openlibrary,
         use_openreview: !args.no_openreview,
+        use_zenodo: !args.no_zenodo,
         cache_enabled: !args.no_cache,
     };
 

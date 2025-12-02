@@ -7,6 +7,7 @@ pub mod openalex;
 pub mod openlibrary;
 pub mod openreview;
 pub mod semantic;
+pub mod zenodo;
 
 use crate::entry::Entry;
 use thiserror::Error;

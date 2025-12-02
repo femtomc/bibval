@@ -46,7 +46,7 @@ impl Default for ValidatorConfig {
             use_semantic: true,
             use_openalex: true,
             use_openlibrary: true,
-            use_openreview: true,
+            use_openreview: false,
             cache_enabled: true,
         }
     }

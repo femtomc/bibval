@@ -1,6 +1,7 @@
 use bibval::{parser, BibValidator, ValidatorConfig};
 use clap::Parser;
 use colored::Colorize;
+use std::collections::HashSet;
 use std::path::PathBuf;
 use std::process::ExitCode;
 
@@ -56,6 +57,10 @@ struct Args {
     /// Verbose output
     #[arg(long, short)]
     verbose: bool,
+
+    /// Only validate entries with these citation keys (comma-separated or repeatable)
+    #[arg(long = "key", short = 'k', value_delimiter = ',')]
+    keys: Vec<String>,
 }
 
 #[tokio::main]
@@ -100,6 +105,28 @@ async fn main() -> ExitCode {
     if all_entries.is_empty() {
         println!("{}", "No entries found to validate.".yellow());
         return ExitCode::SUCCESS;
+    }
+
+    // Apply key filtering if requested
+    if !args.keys.is_empty() {
+        let key_filter: HashSet<_> = args.keys.iter().collect();
+        let before = all_entries.len();
+        all_entries.retain(|e| key_filter.contains(&e.key));
+        let removed = before - all_entries.len();
+
+        if args.verbose && removed > 0 {
+            println!(
+                "{} {} entries filtered out; validating {} remaining.",
+                "Info:".blue().bold(),
+                removed,
+                all_entries.len()
+            );
+        }
+
+        if all_entries.is_empty() {
+            println!("{}", "No entries matched the provided keys.".yellow());
+            return ExitCode::SUCCESS;
+        }
     }
 
     println!();

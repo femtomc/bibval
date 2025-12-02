@@ -41,6 +41,7 @@ bibval paper.bib thesis.bib
 | `--no-cache` | Disable caching of API responses |
 | `-s, --strict` | Exit with error if any issues found |
 | `-v, --verbose` | Verbose output |
+| `-k, --key KEY` | Only validate entries with these citation keys (comma-separated or repeatable) |
 
 ### Example Output
 
